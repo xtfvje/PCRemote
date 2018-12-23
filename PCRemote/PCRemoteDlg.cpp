@@ -32,6 +32,11 @@ COLUMNSTRUCT g_Column_Message_Data[] =
 };
 int g_Column_Message_Width = 0;  //列总宽度
 
+static UINT indicators[] =
+{
+	IDR_STATUSBAR_STRING
+};
+
 // 用于应用程序“关于”菜单项的 CAboutDlg 对话框
 
 class CAboutDlg : public CDialogEx
@@ -70,7 +75,7 @@ END_MESSAGE_MAP()
 
 
 CPCRemoteDlg::CPCRemoteDlg(CWnd* pParent /*=NULL*/)
-	: CDialogEx(IDD_PCREMOTE_DIALOG, pParent)
+	: CDialogEx(IDD_PCREMOTE_DIALOG, pParent), m_iCount(0)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -143,12 +148,15 @@ BOOL CPCRemoteDlg::OnInitDialog()
 	::DrawMenuBar(this->GetSafeHwnd());                    //显示菜单
 
 	this->InitListCtrl();
-	this->Test();
+	CreatStatusBar();
+	this->ShowMessageLog(true, "软件初始化成功...");
 
 	CRect rect;
 	GetWindowRect(&rect);
 	rect.bottom += 20;
 	MoveWindow(rect);
+
+	this->Test();
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -235,7 +243,7 @@ void CPCRemoteDlg::OnSize(UINT nType, int cx, int cy)
 		rc.left = 1;        //列表的左坐标
 		rc.top = cy - 156;    //列表的上坐标
 		rc.right = cx - 1;    //列表的右坐标
-		rc.bottom = cy - 6;  //列表的下坐标
+		rc.bottom = cy - 20;  //列表的下坐标
 		m_CList_Message.MoveWindow(rc);
 
 		for (int i = 0;i < g_Column_Message_Count;i++) //遍历每一个列
@@ -246,6 +254,21 @@ void CPCRemoteDlg::OnSize(UINT nType, int cx, int cy)
 			int lenth = (int)dd;                                  //转换为int 类型
 			m_CList_Message.SetColumnWidth(i, lenth);      //设置当前的宽度
 		}
+	}
+	
+	if (m_wndStatusBar.m_hWnd != NULL) {    //当对话框大小改变时 状态条大小也随之改变
+		CRect rc;
+		rc.top = cy - 20;
+		rc.left = 0;
+		rc.right = cx;
+		rc.bottom = cy;
+		m_wndStatusBar.MoveWindow(rc);
+		TRACE("m_wndStatusBar ----MoveWindow\n");
+		if (rc.top >= 0 && rc.right >= 0 && rc.bottom >= 0)
+		{
+			m_wndStatusBar.SetPaneInfo(0, m_wndStatusBar.GetItemID(0), SBPS_POPOUT, cx - 10);
+		}
+		TRACE("m_wndStatusBar ----SetPaneInfo\n");
 	}
 }
 
@@ -275,6 +298,7 @@ void CPCRemoteDlg::AddList(CString strIP, CString strAddr, CString strPCName, CS
 	m_CList_Online.SetItemText(0, ONLINELIST_CPU, strCPU);
 	m_CList_Online.SetItemText(0, ONLINELIST_VIDEO, strVideo);
 	m_CList_Online.SetItemText(0, ONLINELIST_PING, strPing);
+	this->ShowMessageLog(true, strIP + "主机上线");
 }
 
 void CPCRemoteDlg::ShowMessageLog(bool bIsOK, CString strMsg)
@@ -292,6 +316,23 @@ void CPCRemoteDlg::ShowMessageLog(bool bIsOK, CString strMsg)
 	m_CList_Message.InsertItem(0, strIsOK);
 	m_CList_Message.SetItemText(0, 1, strTime);
 	m_CList_Message.SetItemText(0, 2, strMsg);
+
+	CString strStatusMsg;
+	if (strMsg.Find("上线") > 0)         //处理上线还是下线消息
+	{
+		++m_iCount;
+	}
+	else if (strMsg.Find("下线") > 0)
+	{
+		--m_iCount;
+	}
+	else if (strMsg.Find("断开") > 0)
+	{
+		--m_iCount;
+	}
+	m_iCount = (m_iCount <= 0 ? 0 : m_iCount);         //防止m_iCount 有-1的情况
+	strStatusMsg.Format("连接:%d", m_iCount);
+	m_wndStatusBar.SetPaneText(0, strStatusMsg);   //在状态条上显示文字
 }
 
 void CPCRemoteDlg::Test()
@@ -299,7 +340,6 @@ void CPCRemoteDlg::Test()
 	this->AddList("192.168.0.1", "本机局域网", "zhangxueming", "Windows 10", "2.2GHZ", "有", "123232");
 	this->AddList("192.168.0.2", "本机局域网", "Lang", "Windows7", "2.2GHZ", "有", "123232");
 	this->AddList("192.168.0.3", "本机局域网", "Lang", "Windows7", "2.2GHZ", "有", "123232");
-	this->ShowMessageLog(true, "软件初始化成功...");
 }
 
 void CPCRemoteDlg::OnNMRClickListOnline(NMHDR *pNMHDR, LRESULT *pResult)
@@ -427,4 +467,16 @@ void CPCRemoteDlg::OnMainSet()
 {
 	// TODO: 在此添加命令处理程序代码
 	MessageBox("参数设置");
+}
+
+void CPCRemoteDlg::CreatStatusBar(void)
+{
+	if (!m_wndStatusBar.Create(this) || !m_wndStatusBar.SetIndicators(indicators,sizeof(indicators) / sizeof(UINT)))
+	{
+		TRACE0("Failed to create status bar\n");
+		return;      // fail to create
+	}
+	CRect rc;
+	::GetWindowRect(m_wndStatusBar.m_hWnd, rc);
+	m_wndStatusBar.MoveWindow(rc);
 }
