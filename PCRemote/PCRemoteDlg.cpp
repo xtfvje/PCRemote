@@ -87,6 +87,7 @@ BEGIN_MESSAGE_MAP(CPCRemoteDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_WM_SIZE()
+	ON_NOTIFY(NM_RCLICK, IDC_LIST_ONLINE, &CPCRemoteDlg::OnNMRClickListOnline)
 END_MESSAGE_MAP()
 
 
@@ -278,4 +279,27 @@ void CPCRemoteDlg::Test()
 {
 	this->AddList("192.168.0.1", "本机局域网", "zhangxueming", "Windows 10", "2.2GHZ", "有", "123232");
 	this->ShowMessageLog(true, "软件初始化成功...");
+}
+
+void CPCRemoteDlg::OnNMRClickListOnline(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMITEMACTIVATE pNMItemActivate = reinterpret_cast<LPNMITEMACTIVATE>(pNMHDR);
+	// TODO: 在此添加控件通知处理程序代码
+	*pResult = 0;
+
+	CMenu	popup;
+	popup.LoadMenu(IDR_MENU_ONLINE);
+	CMenu*	pM = popup.GetSubMenu(0);
+	CPoint	p;
+	GetCursorPos(&p);
+	int	count = pM->GetMenuItemCount();
+	if (m_CList_Online.GetSelectedCount() == 0)       //如果没有选中
+	{
+		for (int i = 0; i < count; ++i)
+		{
+			pM->EnableMenuItem(i, MF_BYPOSITION | MF_DISABLED | MF_GRAYED);  //菜单全部变灰
+		}
+
+	}
+	pM->TrackPopupMenu(TPM_LEFTALIGN, p.x, p.y, this);
 }

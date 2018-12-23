@@ -43,4 +43,5 @@ private:
 	CListCtrl m_CList_Message; // 日志列表控件
 public:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg void OnNMRClickListOnline(NMHDR *pNMHDR, LRESULT *pResult);
 };
