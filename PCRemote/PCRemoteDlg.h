@@ -44,4 +44,14 @@ private:
 public:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnNMRClickListOnline(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnOnlineAudio();
+	afx_msg void OnOnlineCmd();
+	afx_msg void OnOnlineDesktop();
+	afx_msg void OnOnlineFile();
+	afx_msg void OnOnlineProcess();
+	afx_msg void OnOnlineRegistry();
+	afx_msg void OnOnlineServer();
+	afx_msg void OnOnlineVideo();
+	afx_msg void OnOnlineWindow();
+	afx_msg void OnOnlineDelete();
 };

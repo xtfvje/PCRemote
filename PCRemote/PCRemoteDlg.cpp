@@ -88,6 +88,16 @@ BEGIN_MESSAGE_MAP(CPCRemoteDlg, CDialogEx)
 	ON_WM_QUERYDRAGICON()
 	ON_WM_SIZE()
 	ON_NOTIFY(NM_RCLICK, IDC_LIST_ONLINE, &CPCRemoteDlg::OnNMRClickListOnline)
+	ON_COMMAND(IDM_ONLINE_AUDIO, &CPCRemoteDlg::OnOnlineAudio)
+	ON_COMMAND(IDM_ONLINE_CMD, &CPCRemoteDlg::OnOnlineCmd)
+	ON_COMMAND(IDM_ONLINE_DESKTOP, &CPCRemoteDlg::OnOnlineDesktop)
+	ON_COMMAND(IDM_ONLINE_FILE, &CPCRemoteDlg::OnOnlineFile)
+	ON_COMMAND(IDM_ONLINE_PROCESS, &CPCRemoteDlg::OnOnlineProcess)
+	ON_COMMAND(IDM_ONLINE_REGISTRY, &CPCRemoteDlg::OnOnlineRegistry)
+	ON_COMMAND(IDM_ONLINE_SERVER, &CPCRemoteDlg::OnOnlineServer)
+	ON_COMMAND(IDM_ONLINE_VIDEO, &CPCRemoteDlg::OnOnlineVideo)
+	ON_COMMAND(IDM_ONLINE_WINDOW, &CPCRemoteDlg::OnOnlineWindow)
+	ON_COMMAND(IDM_ONLINE_DELETE, &CPCRemoteDlg::OnOnlineDelete)
 END_MESSAGE_MAP()
 
 
@@ -278,6 +288,8 @@ void CPCRemoteDlg::ShowMessageLog(bool bIsOK, CString strMsg)
 void CPCRemoteDlg::Test()
 {
 	this->AddList("192.168.0.1", "本机局域网", "zhangxueming", "Windows 10", "2.2GHZ", "有", "123232");
+	this->AddList("192.168.0.2", "本机局域网", "Lang", "Windows7", "2.2GHZ", "有", "123232");
+	this->AddList("192.168.0.3", "本机局域网", "Lang", "Windows7", "2.2GHZ", "有", "123232");
 	this->ShowMessageLog(true, "软件初始化成功...");
 }
 
@@ -302,4 +314,79 @@ void CPCRemoteDlg::OnNMRClickListOnline(NMHDR *pNMHDR, LRESULT *pResult)
 
 	}
 	pM->TrackPopupMenu(TPM_LEFTALIGN, p.x, p.y, this);
+}
+
+
+void CPCRemoteDlg::OnOnlineAudio()
+{
+	// TODO: 在此添加命令处理程序代码
+	MessageBox("语音管理");
+}
+
+
+void CPCRemoteDlg::OnOnlineCmd()
+{
+	// TODO: 在此添加命令处理程序代码
+	MessageBox("终端管理");
+}
+
+
+void CPCRemoteDlg::OnOnlineDesktop()
+{
+	// TODO: 在此添加命令处理程序代码
+	MessageBox("桌面管理");
+}
+
+
+void CPCRemoteDlg::OnOnlineFile()
+{
+	// TODO: 在此添加命令处理程序代码
+	MessageBox("文件管理");
+}
+
+
+void CPCRemoteDlg::OnOnlineProcess()
+{
+	// TODO: 在此添加命令处理程序代码
+	MessageBox("进程管理");
+}
+
+
+void CPCRemoteDlg::OnOnlineRegistry()
+{
+	// TODO: 在此添加命令处理程序代码
+	MessageBox("注册表管理");
+}
+
+
+void CPCRemoteDlg::OnOnlineServer()
+{
+	// TODO: 在此添加命令处理程序代码
+	MessageBox("服务管理");
+}
+
+
+void CPCRemoteDlg::OnOnlineVideo()
+{
+	// TODO: 在此添加命令处理程序代码
+	MessageBox("视频管理");
+}
+
+
+void CPCRemoteDlg::OnOnlineWindow()
+{
+	// TODO: 在此添加命令处理程序代码
+	MessageBox("窗口管理");
+}
+
+
+void CPCRemoteDlg::OnOnlineDelete()
+{
+	// TODO: 在此添加命令处理程序代码
+	CString strIP;
+	int iSelect = m_CList_Online.GetSelectionMark();
+	strIP = m_CList_Online.GetItemText(iSelect, ONLINELIST_IP);
+	m_CList_Online.DeleteItem(iSelect);
+	strIP += " 主机断开连接";
+	ShowMessageLog(true, strIP);
 }
