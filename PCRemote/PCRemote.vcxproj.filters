@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="头文件\tools">
+      <UniqueIdentifier>{8f18ea9c-b2b2-4b2c-910d-f9dd1d8b3607}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\tools">
+      <UniqueIdentifier>{2068a7c6-55cc-49be-ad8f-74530fe1230d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -36,6 +42,9 @@
     <ClInclude Include="syspub.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="tools\TrueColorToolBar.h">
+      <Filter>头文件\tools</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PCRemote.cpp">
@@ -46,6 +55,9 @@
     </ClCompile>
     <ClCompile Include="stdafx.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="tools\TrueColorToolBar.cpp">
+      <Filter>源文件\tools</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -60,6 +72,12 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\PCRemote.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\toolbar1.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\ToolBar_Main.bmp">
       <Filter>资源文件</Filter>
     </Image>
   </ItemGroup>

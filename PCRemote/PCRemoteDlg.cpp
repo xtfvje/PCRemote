@@ -148,7 +148,8 @@ BOOL CPCRemoteDlg::OnInitDialog()
 	::DrawMenuBar(this->GetSafeHwnd());                    //显示菜单
 
 	this->InitListCtrl();
-	CreatStatusBar();
+	this->CreatStatusBar();
+	this->CreateToolBar();
 	this->ShowMessageLog(true, "软件初始化成功...");
 
 	CRect rect;
@@ -215,7 +216,11 @@ HCURSOR CPCRemoteDlg::OnQueryDragIcon()
 void CPCRemoteDlg::OnSize(UINT nType, int cx, int cy)
 {
 	CDialogEx::OnSize(nType, cx, cy);
-
+/*
+	if (SIZE_MINIMIZED == nType)
+	{
+		return;
+	}*/
 	// TODO: 在此处添加消息处理程序代码
 	double dcx = cx;     //对话框的总宽度
 	if (m_CList_Online.m_hWnd != NULL)
@@ -263,12 +268,21 @@ void CPCRemoteDlg::OnSize(UINT nType, int cx, int cy)
 		rc.right = cx;
 		rc.bottom = cy;
 		m_wndStatusBar.MoveWindow(rc);
-		TRACE("m_wndStatusBar ----MoveWindow\n");
+//		TRACE("m_wndStatusBar ----MoveWindow\n");
 		if (rc.top >= 0 && rc.right >= 0 && rc.bottom >= 0)
 		{
 			m_wndStatusBar.SetPaneInfo(0, m_wndStatusBar.GetItemID(0), SBPS_POPOUT, cx - 10);
 		}
-		TRACE("m_wndStatusBar ----SetPaneInfo\n");
+//		TRACE("m_wndStatusBar ----SetPaneInfo\n");
+	}
+
+	if (m_ToolBar.m_hWnd != NULL)  //工具条
+	{
+		CRect rc;
+		rc.top = rc.left = 0;
+		rc.right = cx;
+		rc.bottom = 80;
+		m_ToolBar.MoveWindow(rc);     //设置工具条大小位置
 	}
 }
 
@@ -479,4 +493,45 @@ void CPCRemoteDlg::CreatStatusBar(void)
 	CRect rc;
 	::GetWindowRect(m_wndStatusBar.m_hWnd, rc);
 	m_wndStatusBar.MoveWindow(rc);
+}
+
+void CPCRemoteDlg::CreateToolBar(void)
+{
+	if (!m_ToolBar.CreateEx(this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_TOP
+		| CBRS_GRIPPER | CBRS_TOOLTIPS | CBRS_FLYBY | CBRS_SIZE_DYNAMIC) ||
+		!m_ToolBar.LoadToolBar(IDR_TOOLBAR_MAIN))
+	{
+		TRACE0("Failed to create toolbar\n");
+		return;      // fail to create
+	}
+	m_ToolBar.ModifyStyle(0, TBSTYLE_FLAT);    //Fix for WinXP
+	m_ToolBar.LoadTrueColorToolBar
+	(
+		48,    //加载真彩工具条
+		IDB_BITMAP_MAIN,
+		IDB_BITMAP_MAIN,
+		IDB_BITMAP_MAIN
+	);
+	RECT rt, rtMain;
+	GetWindowRect(&rtMain);
+	rt.left = 0;
+	rt.top = 0;
+	rt.bottom = 80;
+	rt.right = rtMain.right - rtMain.left + 10;
+	m_ToolBar.MoveWindow(&rt, TRUE);
+
+	// 工具条的响应消息设置成对应菜单的ID，复用菜单的消息
+	m_ToolBar.SetButtonText(0, "终端管理");
+	m_ToolBar.SetButtonText(1, "进程管理");
+	m_ToolBar.SetButtonText(2, "窗口管理");
+	m_ToolBar.SetButtonText(3, "桌面管理");
+	m_ToolBar.SetButtonText(4, "文件管理");
+	m_ToolBar.SetButtonText(5, "语音管理");
+	m_ToolBar.SetButtonText(6, "视频管理");
+	m_ToolBar.SetButtonText(7, "服务管理");
+	m_ToolBar.SetButtonText(8, "注册表管理");
+	m_ToolBar.SetButtonText(10, "参数设置");
+	m_ToolBar.SetButtonText(11, "生成服务端");
+	m_ToolBar.SetButtonText(12, "帮助");
+	RepositionBars(AFX_IDW_CONTROLBAR_FIRST, AFX_IDW_CONTROLBAR_LAST, 0);
 }

@@ -4,7 +4,7 @@
 
 #pragma once
 #include "afxcmn.h"
-
+#include "tools/TrueColorToolBar.h"
 
 // CPCRemoteDlg 对话框
 class CPCRemoteDlg : public CDialogEx
@@ -39,11 +39,13 @@ private:
 	void ShowMessageLog(bool bIsOK, CString strMsg);
 	void CreatStatusBar(void);
 	void Test();
+	void CreateToolBar(void);
 private:
 	CListCtrl m_CList_Online;  // 服务端连接后显示的列表控件
 	CListCtrl m_CList_Message; // 日志列表控件
 	CStatusBar  m_wndStatusBar;  //状态条
 	int m_iCount;
+	CTrueColorToolBar m_ToolBar;
 public:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnNMRClickListOnline(NMHDR *pNMHDR, LRESULT *pResult);
