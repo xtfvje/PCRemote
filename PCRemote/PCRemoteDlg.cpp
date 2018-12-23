@@ -98,6 +98,10 @@ BEGIN_MESSAGE_MAP(CPCRemoteDlg, CDialogEx)
 	ON_COMMAND(IDM_ONLINE_VIDEO, &CPCRemoteDlg::OnOnlineVideo)
 	ON_COMMAND(IDM_ONLINE_WINDOW, &CPCRemoteDlg::OnOnlineWindow)
 	ON_COMMAND(IDM_ONLINE_DELETE, &CPCRemoteDlg::OnOnlineDelete)
+	ON_COMMAND(IDM_MAIN_ABOUT, &CPCRemoteDlg::OnMainAbout)
+	ON_COMMAND(IDM_MAIN_BUILD, &CPCRemoteDlg::OnMainBuild)
+	ON_COMMAND(IDM_MAIN_CLOSE, &CPCRemoteDlg::OnMainClose)
+	ON_COMMAND(IDM_MAIN_SET, &CPCRemoteDlg::OnMainSet)
 END_MESSAGE_MAP()
 
 
@@ -133,6 +137,11 @@ BOOL CPCRemoteDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
 	// TODO: 在此添加额外的初始化代码
+	HMENU hmenu;
+	hmenu = LoadMenu(NULL, MAKEINTRESOURCE(IDR_MENU_MAIN));  //载入菜单资源
+	::SetMenu(this->GetSafeHwnd(), hmenu);                  //为窗口设置菜单
+	::DrawMenuBar(this->GetSafeHwnd());                    //显示菜单
+
 	this->InitListCtrl();
 	this->Test();
 
@@ -389,4 +398,33 @@ void CPCRemoteDlg::OnOnlineDelete()
 	m_CList_Online.DeleteItem(iSelect);
 	strIP += " 主机断开连接";
 	ShowMessageLog(true, strIP);
+}
+
+
+void CPCRemoteDlg::OnMainAbout()
+{
+	// TODO: 在此添加命令处理程序代码
+	CAboutDlg dlgAbout;
+	dlgAbout.DoModal();
+}
+
+
+void CPCRemoteDlg::OnMainBuild()
+{
+	// TODO: 在此添加命令处理程序代码
+	MessageBox("生成服务端");
+}
+
+
+void CPCRemoteDlg::OnMainClose()
+{
+	// TODO: 在此添加命令处理程序代码
+	PostMessage(WM_CLOSE);
+}
+
+
+void CPCRemoteDlg::OnMainSet()
+{
+	// TODO: 在此添加命令处理程序代码
+	MessageBox("参数设置");
 }

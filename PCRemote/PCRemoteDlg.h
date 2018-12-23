@@ -54,4 +54,8 @@ public:
 	afx_msg void OnOnlineVideo();
 	afx_msg void OnOnlineWindow();
 	afx_msg void OnOnlineDelete();
+	afx_msg void OnMainAbout();
+	afx_msg void OnMainBuild();
+	afx_msg void OnMainClose();
+	afx_msg void OnMainSet();
 };
