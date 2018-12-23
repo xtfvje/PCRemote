@@ -12,6 +12,23 @@
 #endif
 
 
+COLUMNSTRUCT g_Column_Data[] =
+{
+	{ "IP",				148 },
+	{ "区域",			150 },
+	{ "计算机名/备注",	160 },
+	{ "操作系统",		128 },
+	{ "CPU",			80 },
+	{ "摄像头",			81 },
+	{ "PING",			81 }
+};
+
+COLUMNSTRUCT g_Column_Data_Message[] =
+{
+	{ "信息类型",		68 },
+	{ "时间",			100 },
+	{ "信息内容",	    660 }
+};
 // 用于应用程序“关于”菜单项的 CAboutDlg 对话框
 
 class CAboutDlg : public CDialogEx
@@ -102,6 +119,8 @@ BOOL CPCRemoteDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
 	// TODO: 在此添加额外的初始化代码
+	this->InitListCtrl();
+
 	CRect rect;
 	GetWindowRect(&rect);
 	rect.bottom += 20;
@@ -184,5 +203,18 @@ void CPCRemoteDlg::OnSize(UINT nType, int cx, int cy)
 		rc.right = cx - 1;    //列表的右坐标
 		rc.bottom = cy - 6;  //列表的下坐标
 		m_CList_Message.MoveWindow(rc);
+	}
+}
+
+void CPCRemoteDlg::InitListCtrl()
+{
+	for (int i = 0; i < g_Column_Count; i++)
+	{
+		m_CList_Online.InsertColumn(i, g_Column_Data[i].title, LVCFMT_CENTER, g_Column_Data[i].nWidth);
+	}
+
+	for (int i = 0; i < g_Column_Count_Message; i++)
+	{
+		m_CList_Message.InsertColumn(i, g_Column_Data_Message[i].title, LVCFMT_CENTER, g_Column_Data_Message[i].nWidth);
 	}
 }
