@@ -12,7 +12,7 @@
 #endif
 
 
-COLUMNSTRUCT g_Column_Data[] =
+COLUMNSTRUCT g_Column_Online_Data[] =
 {
 	{ "IP",				148 },
 	{ "区域",			150 },
@@ -22,13 +22,16 @@ COLUMNSTRUCT g_Column_Data[] =
 	{ "摄像头",			81 },
 	{ "PING",			81 }
 };
+int g_Column_Online_Width = 0;  //列总宽度
 
-COLUMNSTRUCT g_Column_Data_Message[] =
+COLUMNSTRUCT g_Column_Message_Data[] =
 {
 	{ "信息类型",		68 },
 	{ "时间",			100 },
 	{ "信息内容",	    660 }
 };
+int g_Column_Message_Width = 0;  //列总宽度
+
 // 用于应用程序“关于”菜单项的 CAboutDlg 对话框
 
 class CAboutDlg : public CDialogEx
@@ -185,6 +188,7 @@ void CPCRemoteDlg::OnSize(UINT nType, int cx, int cy)
 	CDialogEx::OnSize(nType, cx, cy);
 
 	// TODO: 在此处添加消息处理程序代码
+	double dcx = cx;     //对话框的总宽度
 	if (m_CList_Online.m_hWnd != NULL)
 	{
 		CRect rc;
@@ -193,6 +197,15 @@ void CPCRemoteDlg::OnSize(UINT nType, int cx, int cy)
 		rc.right = cx - 1;  //列表的右坐标
 		rc.bottom = cy - 160;  //列表的下坐标
 		m_CList_Online.MoveWindow(rc);
+
+		for (int i = 0;i < g_Column_Online_Count;i++) //遍历每一个列
+		{                   
+			double dd = g_Column_Online_Data[i].nWidth;     //得到当前列的宽度
+			dd /= g_Column_Online_Width;                    //看一看当前宽度占总长度的几分之几
+			dd *= dcx;                                      //用原来的长度乘以所占的几分之几得到当前的宽度
+			int len = (int)dd;                                 //转换为int 类型
+			m_CList_Online.SetColumnWidth(i, len);      //设置当前的宽度
+		}
 	}
 
 	if (m_CList_Message.m_hWnd != NULL)
@@ -203,18 +216,29 @@ void CPCRemoteDlg::OnSize(UINT nType, int cx, int cy)
 		rc.right = cx - 1;    //列表的右坐标
 		rc.bottom = cy - 6;  //列表的下坐标
 		m_CList_Message.MoveWindow(rc);
+
+		for (int i = 0;i < g_Column_Message_Count;i++) //遍历每一个列
+		{                   
+			double dd = g_Column_Message_Data[i].nWidth;     //得到当前列的宽度
+			dd /= g_Column_Message_Width;                    //看一看当前宽度占总长度的几分之几
+			dd *= dcx;                                       //用原来的长度乘以所占的几分之几得到当前的宽度
+			int lenth = (int)dd;                                  //转换为int 类型
+			m_CList_Message.SetColumnWidth(i, lenth);      //设置当前的宽度
+		}
 	}
 }
 
 void CPCRemoteDlg::InitListCtrl()
 {
-	for (int i = 0; i < g_Column_Count; i++)
+	for (int i = 0; i < g_Column_Online_Count; i++)
 	{
-		m_CList_Online.InsertColumn(i, g_Column_Data[i].title, LVCFMT_CENTER, g_Column_Data[i].nWidth);
+		m_CList_Online.InsertColumn(i, g_Column_Online_Data[i].title, LVCFMT_CENTER, g_Column_Online_Data[i].nWidth);
+		g_Column_Online_Width += g_Column_Online_Data[i].nWidth;       //得到总宽度
 	}
 
-	for (int i = 0; i < g_Column_Count_Message; i++)
+	for (int i = 0; i < g_Column_Message_Count; i++)
 	{
-		m_CList_Message.InsertColumn(i, g_Column_Data_Message[i].title, LVCFMT_CENTER, g_Column_Data_Message[i].nWidth);
+		m_CList_Message.InsertColumn(i, g_Column_Message_Data[i].title, LVCFMT_CENTER, g_Column_Message_Data[i].nWidth);
+		g_Column_Message_Width += g_Column_Message_Data[i].nWidth;       //得到总宽度
 	}
 }

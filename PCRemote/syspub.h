@@ -18,7 +18,8 @@ typedef struct
 	int		nWidth;   //列表的宽度
 }COLUMNSTRUCT;
 
-const int g_Column_Count = 7; //列表的个数
-const int g_Column_Count_Message = 7; //列表的个数
+const int g_Column_Online_Count = 7; //列表的个数
+
+const int g_Column_Message_Count = 3; //列表的个数
 
 #endif // !_PC_REMOTE_SYSPUB_H_
