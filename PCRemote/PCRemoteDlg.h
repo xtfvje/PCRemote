@@ -35,6 +35,9 @@ protected:
 
 private:
 	void InitListCtrl();
+	void AddList(CString strIP, CString strAddr, CString strPCName, CString strOS, CString strCPU, CString strVideo, CString strPing);
+	void ShowMessageLog(bool bIsOK, CString strMsg);
+	void Test();
 private:
 	CListCtrl m_CList_Online;  // 服务端连接后显示的列表控件
 	CListCtrl m_CList_Message; // 日志列表控件

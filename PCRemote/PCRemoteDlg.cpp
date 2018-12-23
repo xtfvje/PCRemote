@@ -123,6 +123,7 @@ BOOL CPCRemoteDlg::OnInitDialog()
 
 	// TODO: 在此添加额外的初始化代码
 	this->InitListCtrl();
+	this->Test();
 
 	CRect rect;
 	GetWindowRect(&rect);
@@ -230,15 +231,51 @@ void CPCRemoteDlg::OnSize(UINT nType, int cx, int cy)
 
 void CPCRemoteDlg::InitListCtrl()
 {
+	m_CList_Online.SetExtendedStyle(LVS_EX_FULLROWSELECT);
 	for (int i = 0; i < g_Column_Online_Count; i++)
 	{
 		m_CList_Online.InsertColumn(i, g_Column_Online_Data[i].title, LVCFMT_CENTER, g_Column_Online_Data[i].nWidth);
 		g_Column_Online_Width += g_Column_Online_Data[i].nWidth;       //得到总宽度
 	}
 
+	m_CList_Message.SetExtendedStyle(LVS_EX_FULLROWSELECT);
 	for (int i = 0; i < g_Column_Message_Count; i++)
 	{
 		m_CList_Message.InsertColumn(i, g_Column_Message_Data[i].title, LVCFMT_CENTER, g_Column_Message_Data[i].nWidth);
 		g_Column_Message_Width += g_Column_Message_Data[i].nWidth;       //得到总宽度
 	}
+}
+
+void CPCRemoteDlg::AddList(CString strIP, CString strAddr, CString strPCName, CString strOS, CString strCPU, CString strVideo, CString strPing)
+{
+	m_CList_Online.InsertItem(0, strIP);           //默认为0行  这样所有插入的新列都在最上面
+	m_CList_Online.SetItemText(0, ONLINELIST_ADDR, strAddr);      //设置列的显示字符   这里 ONLINELIST_ADDR等 为第二节课中的枚举类型 用这样的方法
+	m_CList_Online.SetItemText(0, ONLINELIST_COMPUTER_NAME, strPCName); //解决问题会避免以后扩展时的冲突
+	m_CList_Online.SetItemText(0, ONLINELIST_OS, strOS);
+	m_CList_Online.SetItemText(0, ONLINELIST_CPU, strCPU);
+	m_CList_Online.SetItemText(0, ONLINELIST_VIDEO, strVideo);
+	m_CList_Online.SetItemText(0, ONLINELIST_PING, strPing);
+}
+
+void CPCRemoteDlg::ShowMessageLog(bool bIsOK, CString strMsg)
+{
+	CString strIsOK, strTime;
+	CTime t = CTime::GetCurrentTime();
+	strTime = t.Format("%H:%M:%S");
+	if (bIsOK)
+	{
+		strIsOK = "执行成功";
+	}
+	else {
+		strIsOK = "执行失败";
+	}
+	m_CList_Message.InsertItem(0, strIsOK);
+	m_CList_Message.SetItemText(0, 1, strTime);
+	m_CList_Message.SetItemText(0, 2, strMsg);
+}
+
+void CPCRemoteDlg::Test()
+{
+	this->AddList("192.168.0.1", "本机局域网", "zhangxueming", "Windows 10", "2.2GHZ", "有", "123232");
+	this->ShowMessageLog(true, "软件初始化成功...");
 }
