@@ -58,12 +58,15 @@ CPCRemoteDlg::CPCRemoteDlg(CWnd* pParent /*=NULL*/)
 void CPCRemoteDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_LIST_ONLINE, m_CList_Online);
+	DDX_Control(pDX, IDC_LIST_MESSAGE, m_CList_Message);
 }
 
 BEGIN_MESSAGE_MAP(CPCRemoteDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
+	ON_WM_SIZE()
 END_MESSAGE_MAP()
 
 
@@ -99,6 +102,10 @@ BOOL CPCRemoteDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
 	// TODO: 在此添加额外的初始化代码
+	CRect rect;
+	GetWindowRect(&rect);
+	rect.bottom += 20;
+	MoveWindow(rect);
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -152,3 +159,30 @@ HCURSOR CPCRemoteDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
+
+
+void CPCRemoteDlg::OnSize(UINT nType, int cx, int cy)
+{
+	CDialogEx::OnSize(nType, cx, cy);
+
+	// TODO: 在此处添加消息处理程序代码
+	if (m_CList_Online.m_hWnd != NULL)
+	{
+		CRect rc;
+		rc.left = 1;       //列表的左坐标
+		rc.top = 80;       //列表的上坐标
+		rc.right = cx - 1;  //列表的右坐标
+		rc.bottom = cy - 160;  //列表的下坐标
+		m_CList_Online.MoveWindow(rc);
+	}
+
+	if (m_CList_Message.m_hWnd != NULL)
+	{
+		CRect rc;
+		rc.left = 1;        //列表的左坐标
+		rc.top = cy - 156;    //列表的上坐标
+		rc.right = cx - 1;    //列表的右坐标
+		rc.bottom = cy - 6;  //列表的下坐标
+		m_CList_Message.MoveWindow(rc);
+	}
+}
