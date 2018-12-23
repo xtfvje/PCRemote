@@ -107,6 +107,12 @@ BEGIN_MESSAGE_MAP(CPCRemoteDlg, CDialogEx)
 	ON_COMMAND(IDM_MAIN_BUILD, &CPCRemoteDlg::OnMainBuild)
 	ON_COMMAND(IDM_MAIN_CLOSE, &CPCRemoteDlg::OnMainClose)
 	ON_COMMAND(IDM_MAIN_SET, &CPCRemoteDlg::OnMainSet)
+
+	//自定义消息
+	ON_MESSAGE(UM_ICONNOTIFY, (LRESULT(__thiscall CWnd::*)(WPARAM, LPARAM))OnIconNotify)
+	ON_COMMAND(IDM_NOTIFY_SHOW, &CPCRemoteDlg::OnNotifyShow)
+	ON_COMMAND(IDM_NOTIFY_CLOSE, &CPCRemoteDlg::OnNotifyClose)
+	ON_WM_CLOSE()
 END_MESSAGE_MAP()
 
 
@@ -150,6 +156,7 @@ BOOL CPCRemoteDlg::OnInitDialog()
 	this->InitListCtrl();
 	this->CreatStatusBar();
 	this->CreateToolBar();
+	this->InitNotifyIconData();
 	this->ShowMessageLog(true, "软件初始化成功...");
 
 	CRect rect;
@@ -534,4 +541,69 @@ void CPCRemoteDlg::CreateToolBar(void)
 	m_ToolBar.SetButtonText(11, "生成服务端");
 	m_ToolBar.SetButtonText(12, "帮助");
 	RepositionBars(AFX_IDW_CONTROLBAR_FIRST, AFX_IDW_CONTROLBAR_LAST, 0);
+}
+
+void CPCRemoteDlg::InitNotifyIconData()
+{
+	m_notifyID.cbSize = sizeof(m_notifyID);     //大小赋值
+	m_notifyID.hWnd = m_hWnd;           //父窗口
+	m_notifyID.uID = IDR_MAINFRAME;     //icon  ID
+	m_notifyID.uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP;   //托盘所拥有的状态
+	m_notifyID.uCallbackMessage = UM_ICONNOTIFY;            //回调消息
+	m_notifyID.hIcon = m_hIcon;                            //icon 变量
+	CString str = "远程协助软件.........";       //气泡提示
+	lstrcpyn(m_notifyID.szTip, (LPCSTR)str, sizeof(m_notifyID.szTip) / sizeof(m_notifyID.szTip[0]));
+	Shell_NotifyIcon(NIM_ADD, &m_notifyID);   //显示托盘
+}
+
+void CPCRemoteDlg::OnIconNotify(WPARAM wParam, LPARAM lParam)
+{
+	switch ((UINT)lParam)
+	{
+	case WM_LBUTTONDOWN: // click or dbclick left button on icon
+	case WM_LBUTTONDBLCLK: // should show desktop
+		if (!IsWindowVisible())
+		{
+			ShowWindow(SW_SHOW);
+		}			
+		else
+		{
+			ShowWindow(SW_HIDE);
+		}			
+		break;
+	case WM_RBUTTONDOWN: // click right button, show menu
+		{
+			CMenu menu;
+			menu.LoadMenu(IDR_MENU_NOTIFY);
+			CPoint point;
+			GetCursorPos(&point);
+			SetForegroundWindow();
+			menu.GetSubMenu(0)->TrackPopupMenu(TPM_LEFTBUTTON | TPM_RIGHTBUTTON, point.x, point.y, this, NULL);
+			PostMessage(WM_USER, 0, 0);
+		}		
+		break;
+	default:
+		break;
+	}
+}
+
+void CPCRemoteDlg::OnNotifyShow()
+{
+	// TODO: 在此添加命令处理程序代码
+	ShowWindow(SW_SHOW);
+}
+
+
+void CPCRemoteDlg::OnNotifyClose()
+{
+	// TODO: 在此添加命令处理程序代码
+	PostMessage(WM_CLOSE);
+}
+
+
+void CPCRemoteDlg::OnClose()
+{
+	// TODO: 在此添加消息处理程序代码和/或调用默认值
+	Shell_NotifyIcon(NIM_DELETE, &m_notifyID); //销毁托盘图标
+	CDialogEx::OnClose();
 }

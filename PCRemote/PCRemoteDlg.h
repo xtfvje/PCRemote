@@ -40,12 +40,14 @@ private:
 	void CreatStatusBar(void);
 	void Test();
 	void CreateToolBar(void);
+	void InitNotifyIconData();
 private:
 	CListCtrl m_CList_Online;  // 服务端连接后显示的列表控件
 	CListCtrl m_CList_Message; // 日志列表控件
 	CStatusBar  m_wndStatusBar;  //状态条
 	int m_iCount;
 	CTrueColorToolBar m_ToolBar;
+	NOTIFYICONDATA m_notifyID; // 托盘
 public:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnNMRClickListOnline(NMHDR *pNMHDR, LRESULT *pResult);
@@ -63,4 +65,10 @@ public:
 	afx_msg void OnMainBuild();
 	afx_msg void OnMainClose();
 	afx_msg void OnMainSet();
+
+	//自定义消息
+	afx_msg void OnIconNotify(WPARAM wParam, LPARAM lParam);
+	afx_msg void OnNotifyShow();
+	afx_msg void OnNotifyClose();
+	afx_msg void OnClose();
 };
