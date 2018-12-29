@@ -5,6 +5,7 @@
 #pragma once
 #include "afxcmn.h"
 #include "tools/TrueColorToolBar.h"
+#include "socket/IOCPServer.h"
 
 // CPCRemoteDlg ¶Ô»°¿ò
 class CPCRemoteDlg : public CDialogEx
@@ -48,6 +49,7 @@ private:
 	int m_iCount;
 	CTrueColorToolBar m_ToolBar;
 	NOTIFYICONDATA m_notifyID; // ÍÐÅÌ
+	CIOCPServer* m_iocpServer;
 public:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnNMRClickListOnline(NMHDR *pNMHDR, LRESULT *pResult);
@@ -71,4 +73,8 @@ public:
 	afx_msg void OnNotifyShow();
 	afx_msg void OnNotifyClose();
 	afx_msg void OnClose();
+
+protected:
+	static void CALLBACK NotifyProc(LPVOID lpParam, ClientContext* pContext, UINT nCode);
+	void Activate(UINT nPort, UINT nMaxConnections);
 };

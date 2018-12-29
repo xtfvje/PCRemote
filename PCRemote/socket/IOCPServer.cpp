@@ -65,7 +65,7 @@ CIOCPServer::~CIOCPServer()
 }
 
 //lang2.1_5   ³õÊ¼»¯¼àÌý¶Ë¿Ú
-bool CIOCPServer::Initialize(NOTIFYPROC pNotifyProc, CMainFrame* pFrame, int nMaxConnections, int nPort)
+bool CIOCPServer::Initialize(NOTIFYPROC pNotifyProc, CMainFrame* pFrame,  int nMaxConnections, int nPort)
 {
 	m_pNotifyProc	= pNotifyProc;
 	m_pFrame		=  pFrame;

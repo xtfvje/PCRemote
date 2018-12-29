@@ -75,7 +75,7 @@ END_MESSAGE_MAP()
 
 
 CPCRemoteDlg::CPCRemoteDlg(CWnd* pParent /*=NULL*/)
-	: CDialogEx(IDD_PCREMOTE_DIALOG, pParent), m_iCount(0)
+	: CDialogEx(IDD_PCREMOTE_DIALOG, pParent), m_iCount(0), m_iocpServer(NULL)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -164,6 +164,7 @@ BOOL CPCRemoteDlg::OnInitDialog()
 	rect.bottom += 20;
 	MoveWindow(rect);
 
+	Activate(2000, 9999);
 	this->Test();
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
@@ -606,4 +607,90 @@ void CPCRemoteDlg::OnClose()
 	// TODO: 在此添加消息处理程序代码和/或调用默认值
 	Shell_NotifyIcon(NIM_DELETE, &m_notifyID); //销毁托盘图标
 	CDialogEx::OnClose();
+}
+
+//lang2.1_9  NotifyProc是这个socket内核的核心  所有的关于socket 的处理都要调用这个函数
+void CALLBACK CPCRemoteDlg::NotifyProc(LPVOID lpParam, ClientContext *pContext, UINT nCode)
+{
+	try
+	{/*
+		CMainFrame* pFrame = (CMainFrame*)lpParam;
+		CString str;
+		// 对g_pConnectView 进行初始化
+		g_pConnectView = (CGh0stView *)((CGh0stApp *)AfxGetApp())->m_pConnectView;
+		// g_pConnectView还没创建，这情况不会发生
+		if (((CGh0stApp *)AfxGetApp())->m_pConnectView == NULL)
+			return;
+		g_pConnectView->m_iocpServer = m_iocpServer;
+		str.Format("S: %.2f kb/s R: %.2f kb/s", (float)m_iocpServer->m_nSendKbps / 1024, (float)m_iocpServer->m_nRecvKbps / 1024);
+		g_pFrame->m_wndStatusBar.SetPaneText(1, str);
+		*/
+		switch (nCode)
+		{
+		case NC_CLIENT_CONNECT:
+			break;
+		case NC_CLIENT_DISCONNECT:
+		//	g_pConnectView->PostMessage(WM_REMOVEFROMLIST, 0, (LPARAM)pContext);
+			break;
+		case NC_TRANSMIT:
+			break;
+		case NC_RECEIVE:
+		//	ProcessReceive(pContext);        //这里是有数据到来 但没有完全接收  大家可能会奇怪他怎么知道没有完全接收呢？
+											 //回到OnClientReading 继续向下分析
+			break;
+		case NC_RECEIVE_COMPLETE:
+		//	ProcessReceiveComplete(pContext);      //就是这里 数据解压 还原后在调用 ProcessReceiveComplete 转到ProcessReceiveComplete
+			break;
+		}
+	}
+	catch (...) {}
+}
+
+void CPCRemoteDlg::Activate(UINT nPort, UINT nMaxConnections)
+{
+	CString		str;
+	if (m_iocpServer != NULL)
+	{
+		m_iocpServer->Shutdown();
+		delete m_iocpServer;
+
+	}
+	m_iocpServer = new CIOCPServer;
+
+	////lang2.1_8
+	// 开启IPCP服务器 最大连接  端口     查看NotifyProc回调函数  函数定义
+	if (m_iocpServer->Initialize(NotifyProc, NULL, 100000, nPort))
+	{
+		char hostname[256];
+		gethostname(hostname, sizeof(hostname));
+		HOSTENT *host = gethostbyname(hostname);
+		if (host != NULL)
+		{
+			for (int i = 0; ; ++i)
+			{
+				str += inet_ntoa(*(IN_ADDR*)host->h_addr_list[i]);
+				if (host->h_addr_list[i] + host->h_length >= host->h_name)
+					break;
+				str += "/";
+			}
+		}
+		/*
+		m_wndStatusBar.SetPaneText(0, str);
+		str.Format("端口: %d", nPort);
+		m_wndStatusBar.SetPaneText(2, str);
+		*/
+		str.Format("监听端口: %d成功", nPort);
+		ShowMessageLog(true, str);
+	}
+	else
+	{/*
+		str.Format("端口%d绑定失败", nPort);
+		m_wndStatusBar.SetPaneText(0, str);
+		m_wndStatusBar.SetPaneText(2, "端口: 0");
+		*/
+		str.Format("监听端口: %d失败", nPort);
+		ShowMessageLog(false, str);
+	}
+
+//	m_wndStatusBar.SetPaneText(3, "连接: 0");
 }
