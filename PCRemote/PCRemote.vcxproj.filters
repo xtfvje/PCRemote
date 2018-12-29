@@ -19,6 +19,12 @@
     <Filter Include="源文件\tools">
       <UniqueIdentifier>{2068a7c6-55cc-49be-ad8f-74530fe1230d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="头文件\socket">
+      <UniqueIdentifier>{2422bd83-a98e-4cd8-9a5f-679bcec687de}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\socket">
+      <UniqueIdentifier>{ff051c44-3b76-40d0-a8c7-c434e4794a2e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -45,6 +51,18 @@
     <ClInclude Include="tools\TrueColorToolBar.h">
       <Filter>头文件\tools</Filter>
     </ClInclude>
+    <ClInclude Include="socket\IOCPServer.h">
+      <Filter>头文件\socket</Filter>
+    </ClInclude>
+    <ClInclude Include="socket\Buffer.h">
+      <Filter>头文件\socket</Filter>
+    </ClInclude>
+    <ClInclude Include="socket\CpuUsage.h">
+      <Filter>头文件\socket</Filter>
+    </ClInclude>
+    <ClInclude Include="socket\Mapper.h">
+      <Filter>头文件\socket</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PCRemote.cpp">
@@ -58,6 +76,15 @@
     </ClCompile>
     <ClCompile Include="tools\TrueColorToolBar.cpp">
       <Filter>源文件\tools</Filter>
+    </ClCompile>
+    <ClCompile Include="socket\IOCPServer.cpp">
+      <Filter>源文件\socket</Filter>
+    </ClCompile>
+    <ClCompile Include="socket\Buffer.cpp">
+      <Filter>源文件\socket</Filter>
+    </ClCompile>
+    <ClCompile Include="socket\CpuUsage.cpp">
+      <Filter>源文件\socket</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
