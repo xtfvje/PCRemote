@@ -6,6 +6,7 @@
 #include "afxcmn.h"
 #include "tools/TrueColorToolBar.h"
 #include "socket/IOCPServer.h"
+#include "tools/SEU_QQwry.h"
 
 // CPCRemoteDlg ¶Ô»°¿ò
 class CPCRemoteDlg : public CDialogEx
@@ -37,6 +38,7 @@ protected:
 private:
 	void InitListCtrl();
 	void AddList(CString strIP, CString strAddr, CString strPCName, CString strOS, CString strCPU, CString strVideo, CString strPing);
+	void AddList(CString strIP, CString strAddr, CString strPCName, CString strOS, CString strCPU, CString strVideo, CString strPing, ClientContext	*pContext);
 	void ShowMessageLog(bool bIsOK, CString strMsg);
 	void CreatStatusBar(void);
 	void Test();
@@ -51,7 +53,8 @@ private:
 	int m_iCount;
 	CTrueColorToolBar m_ToolBar;
 	NOTIFYICONDATA m_notifyID; // ÍÐÅÌ
-	CIOCPServer* m_iocpServer;
+//	CIOCPServer* m_iocpServer;
+	SEU_QQwry *m_QQwry;
 public:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnNMRClickListOnline(NMHDR *pNMHDR, LRESULT *pResult);
@@ -75,8 +78,10 @@ public:
 	afx_msg void OnNotifyShow();
 	afx_msg void OnNotifyClose();
 	afx_msg void OnClose();
+	afx_msg LRESULT OnAddToList(WPARAM, LPARAM);
 
 protected:
 	static void CALLBACK NotifyProc(LPVOID lpParam, ClientContext* pContext, UINT nCode);
 	void Activate(UINT nPort, UINT nMaxConnections);
+	static void ProcessReceiveComplete(ClientContext *pContext);
 };

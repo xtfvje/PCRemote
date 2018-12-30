@@ -75,6 +75,9 @@
     <ClInclude Include="SettingDlg.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="tools\SEU_QQwry.h">
+      <Filter>头文件\tools</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PCRemote.cpp">
@@ -103,6 +106,9 @@
     </ClCompile>
     <ClCompile Include="SettingDlg.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="tools\SEU_QQwry.cpp">
+      <Filter>源文件\tools</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

