@@ -84,6 +84,11 @@ CPCRemoteDlg::CPCRemoteDlg(CWnd* pParent /*=NULL*/)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 	g_pPCRemoteDlg = this;
+	if (((CPCRemoteApp *)AfxGetApp())->m_bIsQQwryExist)
+	{
+		m_QQwry = new SEU_QQwry;
+		m_QQwry->SetPath("QQWry.Dat");
+	}
 }
 
 void CPCRemoteDlg::DoDataExchange(CDataExchange* pDX)
@@ -734,6 +739,12 @@ void CPCRemoteDlg::Destroy()
 	{
 		delete m_iocpServer;
 		m_iocpServer = NULL;
+	}
+
+	if (NULL != m_QQwry)
+	{
+		delete m_QQwry;
+		m_QQwry = NULL;
 	}
 }
 
