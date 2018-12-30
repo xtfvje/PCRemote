@@ -42,6 +42,8 @@ private:
 	void Test();
 	void CreateToolBar(void);
 	void InitNotifyIconData();
+	void ListenPort(void);
+	void Destroy();
 private:
 	CListCtrl m_CList_Online;  // 服务端连接后显示的列表控件
 	CListCtrl m_CList_Message; // 日志列表控件

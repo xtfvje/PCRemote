@@ -190,9 +190,11 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="file\IniFile.h" />
     <ClInclude Include="PCRemote.h" />
     <ClInclude Include="PCRemoteDlg.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="SettingDlg.h" />
     <ClInclude Include="socket\Buffer.h" />
     <ClInclude Include="socket\CpuUsage.h" />
     <ClInclude Include="socket\IOCPServer.h" />
@@ -203,8 +205,10 @@
     <ClInclude Include="tools\TrueColorToolBar.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="file\IniFile.cpp" />
     <ClCompile Include="PCRemote.cpp" />
     <ClCompile Include="PCRemoteDlg.cpp" />
+    <ClCompile Include="SettingDlg.cpp" />
     <ClCompile Include="socket\Buffer.cpp" />
     <ClCompile Include="socket\CpuUsage.cpp" />
     <ClCompile Include="socket\IOCPServer.cpp" />

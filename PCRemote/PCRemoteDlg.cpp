@@ -6,6 +6,7 @@
 #include "PCRemote.h"
 #include "PCRemoteDlg.h"
 #include "afxdialogex.h"
+#include "SettingDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -164,7 +165,7 @@ BOOL CPCRemoteDlg::OnInitDialog()
 	rect.bottom += 20;
 	MoveWindow(rect);
 
-	Activate(2000, 9999);
+	ListenPort();  //开始监听
 	this->Test();
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
@@ -357,6 +358,17 @@ void CPCRemoteDlg::ShowMessageLog(bool bIsOK, CString strMsg)
 	m_wndStatusBar.SetPaneText(0, strStatusMsg);   //在状态条上显示文字
 }
 
+void CPCRemoteDlg::ListenPort(void)
+{
+	int	nPort = ((CPCRemoteApp*)AfxGetApp())->m_IniFile.GetInt("Settings", "ListenPort");         //读取ini 文件中的监听端口
+	int	nMaxConnection = ((CPCRemoteApp*)AfxGetApp())->m_IniFile.GetInt("Settings", "MaxConnection");   //读取最大连接数
+	if (nPort == 0)
+		nPort = 88;
+	if (nMaxConnection == 0)
+		nMaxConnection = 10000;
+	Activate(nPort, nMaxConnection);             //开始监听
+}
+
 void CPCRemoteDlg::Test()
 {
 	this->AddList("192.168.0.1", "本机局域网", "zhangxueming", "Windows 10", "2.2GHZ", "有", "123232");
@@ -488,7 +500,8 @@ void CPCRemoteDlg::OnMainClose()
 void CPCRemoteDlg::OnMainSet()
 {
 	// TODO: 在此添加命令处理程序代码
-	MessageBox("参数设置");
+	CSettingDlg setDlg;
+	setDlg.DoModal();
 }
 
 void CPCRemoteDlg::CreatStatusBar(void)
@@ -606,6 +619,8 @@ void CPCRemoteDlg::OnClose()
 {
 	// TODO: 在此添加消息处理程序代码和/或调用默认值
 	Shell_NotifyIcon(NIM_DELETE, &m_notifyID); //销毁托盘图标
+	this->Destroy();
+
 	CDialogEx::OnClose();
 }
 
@@ -693,4 +708,13 @@ void CPCRemoteDlg::Activate(UINT nPort, UINT nMaxConnections)
 	}
 
 //	m_wndStatusBar.SetPaneText(3, "连接: 0");
+}
+
+void CPCRemoteDlg::Destroy()
+{
+	if (NULL != m_iocpServer)
+	{
+		delete m_iocpServer;
+		m_iocpServer = NULL;
+	}
 }

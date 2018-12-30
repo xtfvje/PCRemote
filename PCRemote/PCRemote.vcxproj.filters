@@ -25,6 +25,12 @@
     <Filter Include="源文件\socket">
       <UniqueIdentifier>{ff051c44-3b76-40d0-a8c7-c434e4794a2e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="头文件\file">
+      <UniqueIdentifier>{f9d70104-5489-4324-ba0d-cff34a441f92}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\file">
+      <UniqueIdentifier>{023f601f-7027-4944-8268-798a34d1ec2b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -63,6 +69,12 @@
     <ClInclude Include="socket\Mapper.h">
       <Filter>头文件\socket</Filter>
     </ClInclude>
+    <ClInclude Include="file\IniFile.h">
+      <Filter>头文件\file</Filter>
+    </ClInclude>
+    <ClInclude Include="SettingDlg.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PCRemote.cpp">
@@ -85,6 +97,12 @@
     </ClCompile>
     <ClCompile Include="socket\CpuUsage.cpp">
       <Filter>源文件\socket</Filter>
+    </ClCompile>
+    <ClCompile Include="file\IniFile.cpp">
+      <Filter>源文件\file</Filter>
+    </ClCompile>
+    <ClCompile Include="SettingDlg.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
