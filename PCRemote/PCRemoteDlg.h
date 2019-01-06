@@ -46,6 +46,8 @@ private:
 	void InitNotifyIconData();
 	void ListenPort(void);
 	void Destroy();
+	void SendSelectCommand(PBYTE pData, UINT nSize);
+
 private:
 	CListCtrl m_CList_Online;  // 服务端连接后显示的列表控件
 	CListCtrl m_CList_Message; // 日志列表控件
@@ -79,6 +81,7 @@ public:
 	afx_msg void OnNotifyClose();
 	afx_msg void OnClose();
 	afx_msg LRESULT OnAddToList(WPARAM, LPARAM);
+	afx_msg LRESULT OnOpenShellDialog(WPARAM, LPARAM);
 
 protected:
 	static void CALLBACK NotifyProc(LPVOID lpParam, ClientContext* pContext, UINT nCode);

@@ -224,7 +224,9 @@ void CIOCPServer::OnAccept()
     }
 	// 关闭nagle算法,以免影响性能，因为控制时控制端要发送很多数据量很小的数据包,要求马上发送
 	// 暂不关闭，实验得知能网络整体性能有很大影响
-	const char chOpt = 1;
+	//const char chOpt = 1;  //Run-Time Check Failure #2 - Stack around the variable 'chOpt' was corrupted.
+//	BOOL chOpt = TRUE;
+	int chOpt = 1;
 // 	int nErr = setsockopt(pContext->m_Socket, IPPROTO_TCP, TCP_NODELAY, &chOpt, sizeof(char));
 // 	if (nErr == -1)
 // 	{
@@ -251,6 +253,12 @@ void CIOCPServer::OnAccept()
 	// The first message that gets queued up is ClientIoInitializing - see ThreadPoolFunc and 
 	// IO_MESSAGE_HANDLER
 	OVERLAPPEDPLUS	*pOverlap = new OVERLAPPEDPLUS(IOInitialize);
+	if (NULL == pOverlap) // new add
+	{
+		RemoveStaleClient(pContext, TRUE);
+		return;
+	}
+
 	BOOL bSuccess = PostQueuedCompletionStatus(m_hCompletionPort, 0, (DWORD) pContext, &pOverlap->m_ol);	
 	if ( (!bSuccess && GetLastError( ) != ERROR_IO_PENDING))
 	{            
@@ -261,6 +269,13 @@ void CIOCPServer::OnAccept()
 	m_pNotifyProc((LPVOID) m_pFrame, pContext, NC_CLIENT_CONNECT); //回调函数处理  查看Initialize  的使用
 	// Post to WSARecv Next
 	PostRecv(pContext);
+
+	/*
+	if (NULL != pOverlap)
+	{ // 在ThreadPoolFunc最后释放，这里不能delete
+		delete pOverlap;
+		pOverlap = NULL;
+	}*/
 }
 
 
@@ -421,8 +436,12 @@ unsigned CIOCPServer::ThreadPoolFunc (LPVOID thisContext)
 			}
 		}
 
-		if(pOverlapPlus)
-			delete pOverlapPlus; // from previous call
+		if (NULL != pOverlapPlus)
+		{  // 释放上一次的
+//			delete pOverlapPlus; // from previous call
+			pOverlapPlus = NULL;
+		}
+			
     }
 
 	InterlockedDecrement(&pThis->m_nWorkerCnt);
@@ -452,6 +471,11 @@ void CIOCPServer::PostRecv(ClientContext* pContext)
 {
 	// issue a read request 
 	OVERLAPPEDPLUS * pOverlap = new OVERLAPPEDPLUS(IORead);
+	if (NULL == pOverlap)
+	{
+		return ;
+	}
+
 	ULONG			ulFlags = MSG_PARTIAL;
 	DWORD			dwNumberOfBytesRecvd;
 	UINT nRetVal = WSARecv(pContext->m_Socket, &pContext->m_wsaInBuffer,1,&dwNumberOfBytesRecvd, 
@@ -460,6 +484,12 @@ void CIOCPServer::PostRecv(ClientContext* pContext)
 	{
 		RemoveStaleClient(pContext, FALSE);
 	}
+/*
+	if (NULL != pOverlap) // 这里不能释放，否则接收不到IORead数据
+	{ // 在ThreadPoolFunc最后释放，这里不能delete
+		delete pOverlap;
+		pOverlap = NULL;
+	}*/
 }
 
 // DESCRIPTION:	Posts a Write + Data to IO CompletionPort for transfer
@@ -517,9 +547,15 @@ void CIOCPServer::Send(ClientContext* pContext, LPBYTE lpData, UINT nSize)
 	 //	pContext->m_wsaOutBuffer.len = pContext->m_WriteBuffer.GetBufferLen();
 
  		OVERLAPPEDPLUS * pOverlap = new OVERLAPPEDPLUS(IOWrite);
- 		PostQueuedCompletionStatus(m_hCompletionPort, 0, (DWORD) pContext, &pOverlap->m_ol);
+		if (NULL != pOverlap)
+		{
+			PostQueuedCompletionStatus(m_hCompletionPort, 0, (DWORD)pContext, &pOverlap->m_ol);
+			++(pContext->m_nMsgOut);
 
-		pContext->m_nMsgOut++;
+		//	delete pOverlap;  // 不能在这里释放，否则对端接收不到IOWrite数据，重复上线，在ThreadPoolFunc最后释放
+		//	pOverlap = NULL;
+		}
+ 		
 	}catch(...){}
 }
 
@@ -545,9 +581,10 @@ bool CIOCPServer::OnClientReading(ClientContext* pContext, DWORD dwIoSize)
 			InterlockedExchange((LPLONG)&(m_nRecvKbps), nBytes);
 			nBytes = 0;
 		}
+		TRACE("CIOCPServer::OnClientReading: dwIoSize = %d", dwIoSize);
 		if (dwIoSize == 0)
 		{
-			RemoveStaleClient(pContext, FALSE);
+			RemoveStaleClient(pContext, FALSE);			
 			return false;
 		}
 
@@ -557,6 +594,7 @@ bool CIOCPServer::OnClientReading(ClientContext* pContext, DWORD dwIoSize)
 			Send(pContext, pContext->m_ResendWriteBuffer.GetBuffer(), pContext->m_ResendWriteBuffer.GetBufferLen());
 			// 必须再投递一个接收请求
 			PostRecv(pContext);
+			TRACE("CIOCPServer::OnClientReading: dwIoSize = %d, send again ...", dwIoSize);
 			return true;
 		}
 		// Add the message to out message
@@ -596,6 +634,7 @@ bool CIOCPServer::OnClientReading(ClientContext* pContext, DWORD dwIoSize)
 
 				unsigned long	destLen = nUnCompressLength;
 				int	nRet = uncompress(pDeCompressionData, &destLen, pData, nCompressLength);
+				TRACE("CIOCPServer::OnClientReading: uncompress nRet = %d", nRet);
 				if (nRet == Z_OK)
 				{
 					pContext->m_DeCompressionBuffer.ClearBuffer();
@@ -659,15 +698,22 @@ bool CIOCPServer::OnClientWriting(ClientContext* pContext, DWORD dwIoSize)
 		else
 		{
 			OVERLAPPEDPLUS * pOverlap = new OVERLAPPEDPLUS(IOWrite);
-			m_pNotifyProc((LPVOID) m_pFrame, pContext, NC_TRANSMIT);
-			pContext->m_wsaOutBuffer.buf = (char*) pContext->m_WriteBuffer.GetBuffer();
-			pContext->m_wsaOutBuffer.len = pContext->m_WriteBuffer.GetBufferLen();
-			int nRetVal = WSASend(pContext->m_Socket, &pContext->m_wsaOutBuffer,1,&pContext->m_wsaOutBuffer.len, 
-							ulFlags, &pOverlap->m_ol, NULL);
-			if ( nRetVal == SOCKET_ERROR && WSAGetLastError() != WSA_IO_PENDING )
+			if (NULL != pOverlap)
 			{
-				RemoveStaleClient( pContext, FALSE );
+				m_pNotifyProc((LPVOID)m_pFrame, pContext, NC_TRANSMIT);
+				pContext->m_wsaOutBuffer.buf = (char*)pContext->m_WriteBuffer.GetBuffer();
+				pContext->m_wsaOutBuffer.len = pContext->m_WriteBuffer.GetBufferLen();
+				int nRetVal = WSASend(pContext->m_Socket, &pContext->m_wsaOutBuffer, 1, &pContext->m_wsaOutBuffer.len,
+					ulFlags, &pOverlap->m_ol, NULL);
+				if (nRetVal == SOCKET_ERROR && WSAGetLastError() != WSA_IO_PENDING)
+				{
+					RemoveStaleClient(pContext, FALSE);
+				}
+
+				delete pOverlap;
+				pOverlap = NULL;
 			}
+			
 
 		}
 	}catch(...){}

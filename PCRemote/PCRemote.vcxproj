@@ -95,8 +95,8 @@
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <AdditionalDependencies>../thirdpart/zlib/zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <IgnoreSpecificDefaultLibraries>LIBCMT.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <AdditionalDependencies>../thirdpart/zlib/zlib.lib;nafxcwd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>LIBCMT.lib;uafxcwd.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -146,7 +146,7 @@
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>../thirdpart/zlib/zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>../thirdpart/zlib/zlib.lib;nafxcw.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/SAFESEH:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Midl>
@@ -190,11 +190,16 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\thirdpart\Audio.h" />
+    <ClInclude Include="..\thirdpart\CursorInfo.h" />
+    <ClInclude Include="..\thirdpart\macros.h" />
+    <ClInclude Include="..\thirdpart\VideoCodec.h" />
     <ClInclude Include="file\IniFile.h" />
     <ClInclude Include="PCRemote.h" />
     <ClInclude Include="PCRemoteDlg.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="SettingDlg.h" />
+    <ClInclude Include="ShellDlg.h" />
     <ClInclude Include="socket\Buffer.h" />
     <ClInclude Include="socket\CpuUsage.h" />
     <ClInclude Include="socket\IOCPServer.h" />
@@ -206,10 +211,17 @@
     <ClInclude Include="tools\TrueColorToolBar.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\thirdpart\Audio.cpp">
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeaderFile>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="file\IniFile.cpp" />
     <ClCompile Include="PCRemote.cpp" />
     <ClCompile Include="PCRemoteDlg.cpp" />
     <ClCompile Include="SettingDlg.cpp" />
+    <ClCompile Include="ShellDlg.cpp" />
     <ClCompile Include="socket\Buffer.cpp" />
     <ClCompile Include="socket\CpuUsage.cpp" />
     <ClCompile Include="socket\IOCPServer.cpp" />
@@ -229,6 +241,7 @@
     <None Include="res\PCRemote.rc2" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="res\cmdshell.ico" />
     <Image Include="res\PCRemote.ico" />
     <Image Include="res\toolbar1.bmp" />
     <Image Include="res\ToolBar_Main.bmp" />
