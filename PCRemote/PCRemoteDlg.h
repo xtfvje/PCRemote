@@ -82,6 +82,7 @@ public:
 	afx_msg void OnClose();
 	afx_msg LRESULT OnAddToList(WPARAM, LPARAM);
 	afx_msg LRESULT OnOpenShellDialog(WPARAM, LPARAM);
+	afx_msg LRESULT OnOpenSystemDialog(WPARAM, LPARAM);
 
 protected:
 	static void CALLBACK NotifyProc(LPVOID lpParam, ClientContext* pContext, UINT nCode);

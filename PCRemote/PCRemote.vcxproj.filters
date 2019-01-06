@@ -99,6 +99,9 @@
     <ClInclude Include="..\thirdpart\VideoCodec.h">
       <Filter>头文件\thirdpart</Filter>
     </ClInclude>
+    <ClInclude Include="SystemDlg.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PCRemote.cpp">
@@ -137,6 +140,9 @@
     <ClCompile Include="..\thirdpart\Audio.cpp">
       <Filter>源文件\thirdpart</Filter>
     </ClCompile>
+    <ClCompile Include="SystemDlg.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="PCRemote.rc">
@@ -159,6 +165,12 @@
       <Filter>资源文件</Filter>
     </Image>
     <Image Include="res\cmdshell.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\icon1.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\system.ico">
       <Filter>资源文件</Filter>
     </Image>
   </ItemGroup>

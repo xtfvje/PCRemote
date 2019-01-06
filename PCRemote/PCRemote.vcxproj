@@ -206,6 +206,7 @@
     <ClInclude Include="socket\Mapper.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="syspub.h" />
+    <ClInclude Include="SystemDlg.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="tools\SEU_QQwry.h" />
     <ClInclude Include="tools\TrueColorToolBar.h" />
@@ -231,6 +232,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="SystemDlg.cpp" />
     <ClCompile Include="tools\SEU_QQwry.cpp" />
     <ClCompile Include="tools\TrueColorToolBar.cpp" />
   </ItemGroup>
@@ -242,7 +244,9 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\cmdshell.ico" />
+    <Image Include="res\icon1.ico" />
     <Image Include="res\PCRemote.ico" />
+    <Image Include="res\system.ico" />
     <Image Include="res\toolbar1.bmp" />
     <Image Include="res\ToolBar_Main.bmp" />
   </ItemGroup>

